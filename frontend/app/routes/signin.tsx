@@ -1,8 +1,14 @@
 import { useForm } from "react-hook-form";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router";
 import type { Route } from "./+types/signin";
 import type { SigninPayload } from "~/api";
+import { requireGuest } from "~/lib/auth.server";
 import { useSignin } from "~/hooks";
+
+export async function loader({ request }: Route.LoaderArgs) {
+  await requireGuest(request);
+  return null;
+}
 import {
   Card,
   CardContent,
@@ -20,6 +26,7 @@ export function meta(_: Route.MetaArgs) {
 
 export default function SignIn() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const signin = useSignin();
   const {
     register,
@@ -28,7 +35,8 @@ export default function SignIn() {
   } = useForm<SigninPayload>();
 
   const onSubmit = handleSubmit((values) => {
-    signin.mutate(values, { onSuccess: () => navigate("/") });
+    const redirectTo = searchParams.get("redirectTo") || "/";
+    signin.mutate(values, { onSuccess: () => navigate(redirectTo) });
   });
 
   return (

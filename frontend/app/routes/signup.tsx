@@ -2,7 +2,13 @@ import { Controller, useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router";
 import type { Route } from "./+types/signup";
 import type { Role } from "~/api";
+import { requireGuest } from "~/lib/auth.server";
 import { useSignup } from "~/hooks";
+
+export async function loader({ request }: Route.LoaderArgs) {
+  await requireGuest(request);
+  return null;
+}
 import {
   Card,
   CardContent,

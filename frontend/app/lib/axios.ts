@@ -1,8 +1,9 @@
 import axios from "axios";
 import type { AxiosError } from "axios";
 
-// Backend mounts everything under /api. Override per-environment with VITE_API_URL.
-const baseURL = import.meta.env.VITE_API_URL ?? "http://localhost:5000/api";
+// Same-origin "/api" (proxied to the backend in dev, reverse-proxied in prod).
+// Override per-environment with VITE_API_URL.
+const baseURL = import.meta.env.VITE_API_URL ?? "/api";
 
 export const api = axios.create({
   baseURL,
