@@ -1,7 +1,8 @@
-import { Schema, model, type InferSchemaType } from "mongoose";
+import { Schema, model } from "mongoose";
+import type { Order, OrderItem } from "../types/index.ts";
 
 // snapshot of each line item at the time the order was placed
-const orderItemSchema = new Schema(
+const orderItemSchema = new Schema<OrderItem>(
   {
     product: {
       type: Schema.Types.ObjectId,
@@ -16,7 +17,7 @@ const orderItemSchema = new Schema(
   { _id: false }
 );
 
-const orderSchema = new Schema(
+const orderSchema = new Schema<Order>(
   {
     customer: {
       type: Schema.Types.ObjectId,
@@ -53,6 +54,4 @@ const orderSchema = new Schema(
   { timestamps: true }
 );
 
-export type Order = InferSchemaType<typeof orderSchema>;
-
-export const OrderModel = model("Order", orderSchema);
+export const OrderModel = model<Order>("Order", orderSchema);

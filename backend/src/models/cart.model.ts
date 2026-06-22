@@ -1,6 +1,7 @@
-import { Schema, model, type InferSchemaType } from "mongoose";
+import { Schema, model } from "mongoose";
+import type { Cart, CartItem } from "../types/index.ts";
 
-const cartItemSchema = new Schema(
+const cartItemSchema = new Schema<CartItem>(
   {
     product: {
       type: Schema.Types.ObjectId,
@@ -17,7 +18,7 @@ const cartItemSchema = new Schema(
   { _id: false }
 );
 
-const cartSchema = new Schema(
+const cartSchema = new Schema<Cart>(
   {
     // one cart per user
     user: {
@@ -35,6 +36,4 @@ const cartSchema = new Schema(
   { timestamps: true } // updatedAt tracks the last cart change
 );
 
-export type Cart = InferSchemaType<typeof cartSchema>;
-
-export const CartModel = model("Cart", cartSchema);
+export const CartModel = model<Cart>("Cart", cartSchema);

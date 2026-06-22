@@ -1,6 +1,7 @@
-import { Schema, model, type InferSchemaType } from "mongoose";
+import { Schema, model } from "mongoose";
+import type { Address, User } from "../types/index.ts";
 
-const addressSchema = new Schema(
+const addressSchema = new Schema<Address>(
   {
     street: { type: String, trim: true },
     city: { type: String, trim: true },
@@ -11,7 +12,7 @@ const addressSchema = new Schema(
   { _id: false }
 );
 
-const userSchema = new Schema(
+const userSchema = new Schema<User>(
   {
     name: {
       type: String,
@@ -25,7 +26,6 @@ const userSchema = new Schema(
       lowercase: true,
       trim: true,
     },
-    // bcrypt hash — never store plaintext
     password: {
       type: String,
       required: true,
@@ -45,6 +45,4 @@ const userSchema = new Schema(
   { timestamps: true } // adds createdAt and updatedAt
 );
 
-export type User = InferSchemaType<typeof userSchema>;
-
-export const UserModel = model("User", userSchema);
+export const UserModel = model<User>("User", userSchema);

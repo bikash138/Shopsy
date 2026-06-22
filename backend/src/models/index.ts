@@ -1,4 +1,4 @@
-export { UserModel, type User } from "./user.model.ts";
-export { ProductModel, type Product } from "./product.model.ts";
-export { OrderModel, type Order } from "./order.model.ts";
-export { CartModel, type Cart } from "./cart.model.ts";
+export { UserModel } from "./user.model.ts";
+export { ProductModel } from "./product.model.ts";
+export { OrderModel } from "./order.model.ts";
+export { CartModel } from "./cart.model.ts";

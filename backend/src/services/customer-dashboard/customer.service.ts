@@ -1,6 +1,13 @@
 import { CartModel, ProductModel, OrderModel } from "../../models/index.ts";
 import { AppError } from "../../utils/AppError.ts";
-import { isValidObjectId } from "mongoose";
+import { isValidObjectId, Types } from "mongoose";
+import type { Product } from "../../types/index.ts";
+
+// Shape of a cart item once its `product` ref has been populated.
+type PopulatedCartItem = {
+  product: (Product & { _id: Types.ObjectId }) | null;
+  quantity: number;
+};
 
 // --- Cart ---
 
@@ -36,7 +43,7 @@ export async function addToCart(userId: string, productId: string, quantity: num
   if (existing) {
     existing.quantity += quantity;
   } else {
-    cart.items.push({ product: productId as never, quantity });
+    cart.items.push({ product: new Types.ObjectId(productId), quantity });
   }
   await cart.save();
   return cart.populate("items.product");
@@ -47,16 +54,16 @@ export async function updateCartItem(userId: string, productId: string, quantity
   if (!cart) {
     throw new AppError(404, "Cart not found");
   }
-  const item = cart.items.find((i) => String(i.product) === productId);
-  if (!item) {
+  const index = cart.items.findIndex((i) => String(i.product) === productId);
+  if (index === -1) {
     throw new AppError(404, "Item not in cart");
   }
 
   if (quantity <= 0) {
     // setting quantity to 0 removes the line
-    cart.items = cart.items.filter((i) => String(i.product) !== productId) as never;
+    cart.items.splice(index, 1);
   } else {
-    item.quantity = quantity;
+    cart.items[index]!.quantity = quantity;
   }
   await cart.save();
   return cart.populate("items.product");
@@ -83,20 +90,16 @@ export async function clearCart(userId: string) {
 // Converts the cart into an order: validates stock, snapshots prices,
 // decrements stock, persists the order and empties the cart.
 export async function placeOrder(userId: string) {
-  const cart = await CartModel.findOne({ user: userId }).populate("items.product");
+  const cart = await CartModel.findOne({ user: userId }).populate<{
+    items: PopulatedCartItem[];
+  }>("items.product");
   if (!cart || cart.items.length === 0) {
     throw new AppError(400, "Your cart is empty");
   }
 
   let totalAmount = 0;
   const orderItems = cart.items.map((item) => {
-    // populated product document
-    const product = item.product as unknown as {
-      _id: unknown;
-      name: string;
-      price: number;
-      stock: number;
-    };
+    const product = item.product;
     if (!product) {
       throw new AppError(400, "A product in your cart no longer exists");
     }
@@ -120,13 +123,13 @@ export async function placeOrder(userId: string) {
   );
 
   const order = await OrderModel.create({
-    customer: userId,
+    customer: new Types.ObjectId(userId),
     products: orderItems,
     totalAmount,
   });
 
   // Empty the cart now that the order is placed.
-  cart.items = [] as never;
+  cart.items.splice(0, cart.items.length);
   await cart.save();
 
   return order;

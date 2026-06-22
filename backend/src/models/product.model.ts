@@ -1,6 +1,7 @@
-import { Schema, model, type InferSchemaType } from "mongoose";
+import { Schema, model } from "mongoose";
+import type { Product } from "../types/index.ts";
 
-const productSchema = new Schema(
+const productSchema = new Schema<Product>(
   {
     name: {
       type: String,
@@ -33,7 +34,6 @@ const productSchema = new Schema(
       type: String,
       required: true,
     },
-    // the seller who owns/listed this product
     seller: {
       type: Schema.Types.ObjectId,
       ref: "User",
@@ -44,6 +44,4 @@ const productSchema = new Schema(
   { timestamps: true }
 );
 
-export type Product = InferSchemaType<typeof productSchema>;
-
-export const ProductModel = model("Product", productSchema);
+export const ProductModel = model<Product>("Product", productSchema);
