@@ -8,6 +8,7 @@ import {
   placeOrder,
   getCustomerOrders,
   getCustomerOrderById,
+  cancelOrder,
 } from "../services/customer-dashboard/customer.service.ts";
 import { authenticate, authorize } from "../middleware/auth.middleware.ts";
 import { validate } from "../middleware/validate.ts";
@@ -76,5 +77,13 @@ customerRouter.get(
   validate({ params: idParamSchema }),
   async (req: Request<{ id: string }>, res: Response) => {
     res.json(await getCustomerOrderById(req.user!.sub, req.params.id));
+  }
+);
+
+customerRouter.patch(
+  "/orders/:id/cancel",
+  validate({ params: idParamSchema }),
+  async (req: Request<{ id: string }>, res: Response) => {
+    res.json(await cancelOrder(req.user!.sub, req.params.id));
   }
 );

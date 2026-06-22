@@ -5,15 +5,18 @@ import {
   updateProduct,
   deleteProduct,
   getSellerOrders,
+  updateOrderStatus,
 } from "../services/seller-dashboard/seller.service.ts";
 import { authenticate, authorize } from "../middleware/auth.middleware.ts";
 import { validate } from "../middleware/validate.ts";
 import {
   createProductSchema,
   updateProductSchema,
+  updateOrderStatusSchema,
   idParamSchema,
   type CreateProductInput,
   type UpdateProductInput,
+  type UpdateOrderStatusInput,
 } from "../validators/index.ts";
 
 export const sellerRouter = Router();
@@ -53,3 +56,11 @@ sellerRouter.delete(
 sellerRouter.get("/orders", async (req: Request, res: Response) => {
   res.json(await getSellerOrders(req.user!.sub));
 });
+
+sellerRouter.patch(
+  "/orders/:id/status",
+  validate({ params: idParamSchema, body: updateOrderStatusSchema }),
+  async (req: Request<{ id: string }, unknown, UpdateOrderStatusInput>, res: Response) => {
+    res.json(await updateOrderStatus(req.user!.sub, req.params.id, req.body.status));
+  }
+);

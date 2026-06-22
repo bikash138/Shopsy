@@ -1,6 +1,10 @@
 import { ProductModel, OrderModel } from "../../models/index.ts";
 import { AppError } from "../../utils/AppError.ts";
-import type { CreateProductInput, UpdateProductInput } from "../../validators/index.ts";
+import type {
+  CreateProductInput,
+  UpdateProductInput,
+  UpdateOrderStatusInput,
+} from "../../validators/index.ts";
 
 // --- Products owned by the seller ---
 
@@ -47,4 +51,27 @@ export async function getSellerOrders(sellerId: string) {
   return OrderModel.find({ "products.product": { $in: productIds } })
     .sort({ createdAt: -1 })
     .populate("customer", "name email");
+}
+
+// A seller may advance the status of any order that contains one of their
+// products. Cancelled orders are terminal and cannot be reopened.
+export async function updateOrderStatus(
+  sellerId: string,
+  orderId: string,
+  status: UpdateOrderStatusInput["status"]
+) {
+  const productIds = await ProductModel.find({ seller: sellerId }).distinct("_id");
+  const order = await OrderModel.findOne({
+    _id: orderId,
+    "products.product": { $in: productIds },
+  });
+  if (!order) {
+    throw new AppError(404, "Order not found");
+  }
+  if (order.orderStatus === "cancelled") {
+    throw new AppError(400, "Cannot update a cancelled order");
+  }
+  order.orderStatus = status;
+  await order.save();
+  return order;
 }

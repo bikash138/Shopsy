@@ -143,3 +143,31 @@ export async function getCustomerOrderById(userId: string, orderId: string) {
   }
   return order;
 }
+
+// Cancels an order that is still processing and returns the reserved stock.
+export async function cancelOrder(userId: string, orderId: string) {
+  const order = await OrderModel.findOne({ _id: orderId, customer: userId });
+  if (!order) {
+    throw new AppError(404, "Order not found");
+  }
+  if (order.orderStatus === "cancelled") {
+    throw new AppError(400, "Order is already cancelled");
+  }
+  if (order.orderStatus !== "processing") {
+    throw new AppError(400, "Only orders that are still processing can be cancelled");
+  }
+
+  // Put the stock back for each line item.
+  await Promise.all(
+    order.products.map((item) =>
+      ProductModel.updateOne({ _id: item.product }, { $inc: { stock: item.quantity } })
+    )
+  );
+
+  order.orderStatus = "cancelled";
+  if (order.paymentStatus === "paid") {
+    order.paymentStatus = "refunded";
+  }
+  await order.save();
+  return order;
+}
