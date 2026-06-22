@@ -15,12 +15,11 @@ const cartItemSchema = new Schema<CartItem>(
       default: 1,
     },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const cartSchema = new Schema<Cart>(
   {
-    // one cart per user
     user: {
       type: Schema.Types.ObjectId,
       ref: "User",
@@ -33,7 +32,7 @@ const cartSchema = new Schema<Cart>(
       default: [],
     },
   },
-  { timestamps: true } // updatedAt tracks the last cart change
+  { timestamps: true },
 );
 
 export const CartModel = model<Cart>("Cart", cartSchema);

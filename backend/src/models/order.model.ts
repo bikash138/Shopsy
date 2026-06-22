@@ -9,12 +9,11 @@ const orderItemSchema = new Schema<OrderItem>(
       ref: "Product",
       required: true,
     },
-    // captured at purchase time so later price/name changes don't alter the order
     name: { type: String, required: true },
     price: { type: Number, required: true, min: 0 },
     quantity: { type: Number, required: true, min: 1 },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const orderSchema = new Schema<Order>(
@@ -51,7 +50,7 @@ const orderSchema = new Schema<Order>(
       required: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export const OrderModel = model<Order>("Order", orderSchema);

@@ -1,6 +1,6 @@
 import { CartModel, ProductModel, OrderModel } from "../../models/index.ts";
 import { AppError } from "../../utils/AppError.ts";
-import { isValidObjectId, Types } from "mongoose";
+import { Types } from "mongoose";
 import type { Product } from "../../types/index.ts";
 
 // Shape of a cart item once its `product` ref has been populated.
@@ -22,9 +22,6 @@ export async function getCart(userId: string) {
 }
 
 export async function addToCart(userId: string, productId: string, quantity: number) {
-  if (!isValidObjectId(productId)) {
-    throw new AppError(400, "Invalid product id");
-  }
   const product = await ProductModel.findById(productId);
   if (!product) {
     throw new AppError(404, "Product not found");
@@ -140,9 +137,6 @@ export async function getCustomerOrders(userId: string) {
 }
 
 export async function getCustomerOrderById(userId: string, orderId: string) {
-  if (!isValidObjectId(orderId)) {
-    throw new AppError(400, "Invalid order id");
-  }
   const order = await OrderModel.findOne({ _id: orderId, customer: userId });
   if (!order) {
     throw new AppError(404, "Order not found");

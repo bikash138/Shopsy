@@ -1,19 +1,10 @@
 import { ProductModel, OrderModel } from "../../models/index.ts";
 import { AppError } from "../../utils/AppError.ts";
-import { isValidObjectId } from "mongoose";
-
-interface ProductInput {
-  name: string;
-  description: string;
-  category: string;
-  price: number;
-  stock: number;
-  image: string;
-}
+import type { CreateProductInput, UpdateProductInput } from "../../validators/index.ts";
 
 // --- Products owned by the seller ---
 
-export async function createProduct(sellerId: string, input: ProductInput) {
+export async function createProduct(sellerId: string, input: CreateProductInput) {
   return ProductModel.create({ ...input, seller: sellerId });
 }
 
@@ -22,9 +13,6 @@ export async function getSellerProducts(sellerId: string) {
 }
 
 async function findOwnedProduct(sellerId: string, productId: string) {
-  if (!isValidObjectId(productId)) {
-    throw new AppError(400, "Invalid product id");
-  }
   const product = await ProductModel.findById(productId);
   if (!product) {
     throw new AppError(404, "Product not found");
@@ -39,7 +27,7 @@ async function findOwnedProduct(sellerId: string, productId: string) {
 export async function updateProduct(
   sellerId: string,
   productId: string,
-  updates: Partial<ProductInput>
+  updates: UpdateProductInput
 ) {
   const product = await findOwnedProduct(sellerId, productId);
   Object.assign(product, updates);

@@ -1,6 +1,5 @@
 import { ProductModel } from "../../models/index.ts";
 import { AppError } from "../../utils/AppError.ts";
-import { isValidObjectId } from "mongoose";
 
 interface ListProductsParams {
   category?: string;
@@ -42,9 +41,6 @@ export async function listProducts(params: ListProductsParams) {
 }
 
 export async function getProductById(id: string) {
-  if (!isValidObjectId(id)) {
-    throw new AppError(400, "Invalid product id");
-  }
   const product = await ProductModel.findById(id).populate("seller", "name");
   if (!product) {
     throw new AppError(404, "Product not found");

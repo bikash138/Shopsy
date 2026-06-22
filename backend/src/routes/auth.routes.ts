@@ -1,33 +1,16 @@
 import { Router, type Request, type Response } from "express";
-import { z } from "zod";
 import { signup, signin } from "../services/auth/auth.service.ts";
 import { authenticate } from "../middleware/auth.middleware.ts";
+import { validate } from "../middleware/validate.ts";
+import {
+  signupSchema,
+  signinSchema,
+  type SignupInput,
+  type SigninInput,
+} from "../validators/index.ts";
 import { env } from "../config/env.ts";
 
 export const authRouter = Router();
-
-const addressSchema = z
-  .object({
-    street: z.string().optional(),
-    city: z.string().optional(),
-    state: z.string().optional(),
-    postalCode: z.string().optional(),
-    country: z.string().optional(),
-  })
-  .optional();
-
-const signupSchema = z.object({
-  name: z.string().min(1),
-  email: z.email(),
-  password: z.string().min(6),
-  role: z.enum(["seller", "customer"]).optional(),
-  address: addressSchema,
-});
-
-const signinSchema = z.object({
-  email: z.email(),
-  password: z.string().min(1),
-});
 
 // Sets the auth token as an httpOnly cookie (read back by cookie-parser).
 function setAuthCookie(res: Response, token: string) {
@@ -39,19 +22,25 @@ function setAuthCookie(res: Response, token: string) {
   });
 }
 
-authRouter.post("/signup", async (req: Request, res: Response) => {
-  const input = signupSchema.parse(req.body);
-  const { user, token } = await signup(input);
-  setAuthCookie(res, token);
-  res.status(201).json({ user, token });
-});
+authRouter.post(
+  "/signup",
+  validate({ body: signupSchema }),
+  async (req: Request<unknown, unknown, SignupInput>, res: Response) => {
+    const { user, token } = await signup(req.body);
+    setAuthCookie(res, token);
+    res.status(201).json({ user, token });
+  }
+);
 
-authRouter.post("/signin", async (req: Request, res: Response) => {
-  const input = signinSchema.parse(req.body);
-  const { user, token } = await signin(input);
-  setAuthCookie(res, token);
-  res.json({ user, token });
-});
+authRouter.post(
+  "/signin",
+  validate({ body: signinSchema }),
+  async (req: Request<unknown, unknown, SigninInput>, res: Response) => {
+    const { user, token } = await signin(req.body);
+    setAuthCookie(res, token);
+    res.json({ user, token });
+  }
+);
 
 authRouter.post("/signout", authenticate, (_req: Request, res: Response) => {
   res.clearCookie("token");

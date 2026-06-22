@@ -2,25 +2,7 @@ import { UserModel } from "../../models/index.ts";
 import { hashPassword, comparePassword } from "../../utils/password.ts";
 import { signToken } from "../../utils/jwt.ts";
 import { AppError } from "../../utils/AppError.ts";
-
-interface SignupInput {
-  name: string;
-  email: string;
-  password: string;
-  role?: "seller" | "customer";
-  address?: {
-    street?: string;
-    city?: string;
-    state?: string;
-    postalCode?: string;
-    country?: string;
-  };
-}
-
-interface SigninInput {
-  email: string;
-  password: string;
-}
+import type { SignupInput, SigninInput } from "../../validators/index.ts";
 
 // Shape returned to clients — never includes the password hash.
 function toPublicUser(user: {
