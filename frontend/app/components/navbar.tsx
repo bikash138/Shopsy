@@ -42,6 +42,9 @@ export function Navbar({ session }: { session: AuthSession | null }) {
         <div className="flex items-center gap-2">
           {session ? (
             <>
+              <Button asChild variant="ghost" size="sm">
+                <Link to="/profile">Profile</Link>
+              </Button>
               <span className="mr-1 hidden text-sm text-muted-foreground capitalize sm:inline">
                 {session.role}
               </span>
