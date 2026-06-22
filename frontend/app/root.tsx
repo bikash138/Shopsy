@@ -7,7 +7,7 @@ import {
   ScrollRestoration,
 } from "react-router";
 
-import { Toaster } from "sonner";
+import { Toaster } from "~/components/ui/sonner";
 
 import type { Route } from "./+types/root";
 import { QueryProvider } from "~/providers/query-provider";
@@ -37,7 +37,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         {children}
-        <Toaster richColors position="top-right" closeButton />
+        <Toaster position="top-right" richColors closeButton />
         <ScrollRestoration />
         <Scripts />
       </body>
