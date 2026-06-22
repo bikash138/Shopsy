@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { customerApi } from "~/api";
 import { queryKeys } from "~/lib/query-keys";
 
@@ -25,7 +26,9 @@ export function usePlaceOrder() {
       qc.invalidateQueries({ queryKey: queryKeys.customerOrders.all });
       // Checkout empties the cart on the backend.
       qc.invalidateQueries({ queryKey: queryKeys.cart });
+      toast.success("Order placed successfully");
     },
+    onError: (error) => toast.error(error.message),
   });
 }
 
@@ -38,6 +41,8 @@ export function useCancelOrder() {
       qc.invalidateQueries({ queryKey: queryKeys.customerOrders.detail(order._id) });
       // Cancelling restores product stock.
       qc.invalidateQueries({ queryKey: queryKeys.products.all });
+      toast.success("Order cancelled");
     },
+    onError: (error) => toast.error(error.message),
   });
 }
