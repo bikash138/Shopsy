@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "dev": "node --watch src/index.ts",
-    "start": "node src/index.ts"
+    "start": "node src/index.ts",
+    "seed": "node src/seed.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",

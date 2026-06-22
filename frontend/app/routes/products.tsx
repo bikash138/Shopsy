@@ -3,11 +3,10 @@ import { Link } from "react-router";
 import type { Route } from "./+types/products";
 import { getSession } from "~/lib/auth.server";
 import { useAddToCart, useCategories, useProducts } from "~/hooks";
-import { formatPrice } from "~/lib/format";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { Card } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
+import { ProductCard } from "~/components/product-card";
 import {
   Select,
   SelectContent,
@@ -89,42 +88,30 @@ export default function Products({ loaderData }: Route.ComponentProps) {
       ) : (
         <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
           {products.map((p) => (
-            <Card key={p._id} className="overflow-hidden p-0">
-              <Link to={`/products/${p._id}`}>
-                <img
-                  src={p.image}
-                  alt={p.name}
-                  className="aspect-square w-full object-cover"
-                />
-              </Link>
-              <div className="flex flex-1 flex-col gap-2 p-4">
-                <Link to={`/products/${p._id}`} className="font-medium hover:underline">
-                  {p.name}
-                </Link>
-                <p className="text-xs text-muted-foreground">{p.category}</p>
-                <div className="mt-auto flex items-center justify-between pt-2">
-                  <span className="font-semibold">{formatPrice(p.price)}</span>
-                  {p.stock === 0 ? (
-                    <span className="text-xs text-destructive">Out of stock</span>
-                  ) : isCustomer ? (
-                    <Button
-                      size="sm"
-                      onClick={() => addToCart.mutate({ productId: p._id })}
-                      disabled={
-                        addToCart.isPending &&
-                        addToCart.variables?.productId === p._id
-                      }
-                    >
-                      Add
-                    </Button>
-                  ) : (
-                    <Button asChild size="sm" variant="outline">
-                      <Link to="/signin">Sign in</Link>
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </Card>
+            <ProductCard
+              key={p._id}
+              product={p}
+              action={
+                p.stock === 0 ? (
+                  <span className="text-xs text-destructive">Out of stock</span>
+                ) : isCustomer ? (
+                  <Button
+                    size="sm"
+                    onClick={() => addToCart.mutate({ productId: p._id })}
+                    disabled={
+                      addToCart.isPending &&
+                      addToCart.variables?.productId === p._id
+                    }
+                  >
+                    Add
+                  </Button>
+                ) : (
+                  <Button asChild size="sm" variant="outline">
+                    <Link to="/signin">Sign in</Link>
+                  </Button>
+                )
+              }
+            />
           ))}
         </div>
       )}
