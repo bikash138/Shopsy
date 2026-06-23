@@ -5,6 +5,7 @@ import { useCustomerOrder } from "~/hooks";
 import { formatDate, formatPrice } from "~/lib/format";
 import { OrderStatusBadge, PaymentStatusBadge } from "~/components/status-badge";
 import { CancelOrderButton } from "~/components/cancel-order-button";
+import { PayButton } from "~/components/pay-button";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { Separator } from "~/components/ui/separator";
@@ -79,11 +80,18 @@ export default function OrderDetail({ loaderData }: Route.ComponentProps) {
         </div>
       </Card>
 
-      {order.orderStatus === "processing" && (
-        <div className="mt-6 flex justify-end">
-          <CancelOrderButton orderId={order._id} size="default" />
-        </div>
-      )}
+      {(() => {
+        const canPay =
+          order.paymentStatus === "pending" && order.orderStatus !== "cancelled";
+        const canCancel = order.orderStatus === "processing";
+        if (!canPay && !canCancel) return null;
+        return (
+          <div className="mt-6 flex justify-end gap-2">
+            {canPay && <PayButton orderId={order._id} size="default" />}
+            {canCancel && <CancelOrderButton orderId={order._id} size="default" />}
+          </div>
+        );
+      })()}
     </div>
   );
 }

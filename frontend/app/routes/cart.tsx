@@ -159,7 +159,8 @@ export default function Cart() {
         disabled={placeOrder.isPending}
         onClick={() =>
           placeOrder.mutate(undefined, {
-            onSuccess: () => navigate("/orders"),
+            // Land on the new order so the customer can pay right away.
+            onSuccess: (order) => navigate(`/orders/${order._id}`),
           })
         }
       >

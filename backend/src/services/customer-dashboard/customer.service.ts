@@ -2,6 +2,9 @@ import { CartModel, ProductModel, OrderModel } from "../../models/index.ts";
 import { AppError } from "../../utils/AppError.ts";
 import { Types } from "mongoose";
 import type { Product } from "../../types/index.ts";
+import { env } from "../../config/env.ts";
+import { getRazorpay, verifyPaymentSignature } from "../../config/razorpay.ts";
+import type { VerifyPaymentInput } from "../../validators/index.ts";
 
 // Shape of a cart item once its `product` ref has been populated.
 type PopulatedCartItem = {
@@ -168,6 +171,75 @@ export async function cancelOrder(userId: string, orderId: string) {
   if (order.paymentStatus === "paid") {
     order.paymentStatus = "refunded";
   }
+  await order.save();
+  return order;
+}
+
+// --- Payments (Razorpay) ---
+
+// Creates a Razorpay order for an unpaid order and returns the details the
+// frontend checkout needs.
+export async function createPayment(userId: string, orderId: string) {
+  const order = await OrderModel.findOne({ _id: orderId, customer: userId });
+  if (!order) {
+    throw new AppError(404, "Order not found");
+  }
+  if (order.paymentStatus === "paid") {
+    throw new AppError(400, "Order is already paid");
+  }
+  if (order.orderStatus === "cancelled") {
+    throw new AppError(400, "Order has been cancelled");
+  }
+
+  const razorpay = getRazorpay();
+  const rzpOrder = await razorpay.orders.create({
+    amount: Math.round(order.totalAmount * 100), // amount in paise
+    currency: "INR",
+    receipt: String(order._id),
+  });
+
+  order.razorpayOrderId = rzpOrder.id;
+  await order.save();
+
+  return {
+    keyId: env.razorpayKeyId,
+    razorpayOrderId: rzpOrder.id,
+    amount: Number(rzpOrder.amount),
+    currency: rzpOrder.currency,
+    orderId: String(order._id),
+  };
+}
+
+// Verifies the checkout signature and marks the order paid.
+export async function verifyPayment(
+  userId: string,
+  orderId: string,
+  input: VerifyPaymentInput
+) {
+  const order = await OrderModel.findOne({ _id: orderId, customer: userId });
+  if (!order) {
+    throw new AppError(404, "Order not found");
+  }
+  if (order.paymentStatus === "paid") {
+    return order; // already verified — idempotent
+  }
+  if (order.razorpayOrderId !== input.razorpayOrderId) {
+    throw new AppError(400, "Payment order mismatch");
+  }
+
+  const valid = verifyPaymentSignature(
+    input.razorpayOrderId,
+    input.razorpayPaymentId,
+    input.razorpaySignature
+  );
+  if (!valid) {
+    order.paymentStatus = "failed";
+    await order.save();
+    throw new AppError(400, "Payment verification failed");
+  }
+
+  order.paymentStatus = "paid";
+  order.razorpayPaymentId = input.razorpayPaymentId;
   await order.save();
   return order;
 }

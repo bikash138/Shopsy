@@ -114,8 +114,25 @@ export interface Order {
   totalAmount: number;
   paymentStatus: PaymentStatus;
   orderStatus: OrderStatus;
+  razorpayOrderId?: string;
+  razorpayPaymentId?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+// Returned by POST /customer/orders/:id/payment — feeds the Razorpay checkout.
+export interface CreatePaymentResponse {
+  keyId: string;
+  razorpayOrderId: string;
+  amount: number;
+  currency: string;
+  orderId: string;
+}
+
+export interface VerifyPaymentPayload {
+  razorpayOrderId: string;
+  razorpayPaymentId: string;
+  razorpaySignature: string;
 }
 
 // --- Request payloads ---

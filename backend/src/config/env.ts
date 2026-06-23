@@ -10,6 +10,9 @@ const envSchema = z.object({
   NODE_ENV: z
     .enum(["development", "production", "test"])
     .default("development"),
+  // Razorpay — optional; payment endpoints are disabled until both are set.
+  RAZORPAY_KEY_ID: z.string().default(""),
+  RAZORPAY_KEY_SECRET: z.string().default(""),
 });
 
 const parsed = envSchema.safeParse(process.env);
@@ -27,4 +30,6 @@ export const env = {
   jwtSecret: data.JWT_SECRET,
   jwtExpiresIn: data.JWT_EXPIRES_IN,
   nodeEnv: data.NODE_ENV,
+  razorpayKeyId: data.RAZORPAY_KEY_ID,
+  razorpayKeySecret: data.RAZORPAY_KEY_SECRET,
 };

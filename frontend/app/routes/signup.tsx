@@ -1,5 +1,5 @@
 import { Controller, useForm } from "react-hook-form";
-import { Link, useNavigate } from "react-router";
+import { Link } from "react-router";
 import type { Route } from "./+types/signup";
 import type { Role } from "~/api";
 import { requireGuest } from "~/lib/auth.server";
@@ -39,7 +39,6 @@ interface SignupForm {
 }
 
 export default function SignUp() {
-  const navigate = useNavigate();
   const signup = useSignup();
   const {
     register,
@@ -49,7 +48,8 @@ export default function SignUp() {
   } = useForm<SignupForm>({ defaultValues: { role: "customer" } });
 
   const onSubmit = handleSubmit((values) => {
-    signup.mutate(values, { onSuccess: () => navigate("/") });
+    // Full navigation so the SSR loaders re-run with the new auth cookie.
+    signup.mutate(values, { onSuccess: () => window.location.assign("/") });
   });
 
   return (

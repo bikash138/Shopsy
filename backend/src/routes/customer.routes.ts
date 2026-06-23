@@ -9,6 +9,8 @@ import {
   getCustomerOrders,
   getCustomerOrderById,
   cancelOrder,
+  createPayment,
+  verifyPayment,
 } from "../services/customer-dashboard/customer.service.ts";
 import { authenticate, authorize } from "../middleware/auth.middleware.ts";
 import { validate } from "../middleware/validate.ts";
@@ -17,8 +19,10 @@ import {
   updateCartItemSchema,
   cartItemParamSchema,
   idParamSchema,
+  verifyPaymentSchema,
   type AddCartItemInput,
   type UpdateCartItemInput,
+  type VerifyPaymentInput,
 } from "../validators/index.ts";
 
 export const customerRouter = Router();
@@ -85,5 +89,23 @@ customerRouter.patch(
   validate({ params: idParamSchema }),
   async (req: Request<{ id: string }>, res: Response) => {
     res.json(await cancelOrder(req.user!.sub, req.params.id));
+  }
+);
+
+// --- Payments ---
+
+customerRouter.post(
+  "/orders/:id/payment",
+  validate({ params: idParamSchema }),
+  async (req: Request<{ id: string }>, res: Response) => {
+    res.json(await createPayment(req.user!.sub, req.params.id));
+  }
+);
+
+customerRouter.post(
+  "/orders/:id/payment/verify",
+  validate({ params: idParamSchema, body: verifyPaymentSchema }),
+  async (req: Request<{ id: string }, unknown, VerifyPaymentInput>, res: Response) => {
+    res.json(await verifyPayment(req.user!.sub, req.params.id, req.body));
   }
 );

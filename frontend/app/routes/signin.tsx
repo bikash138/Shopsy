@@ -1,5 +1,5 @@
 import { useForm } from "react-hook-form";
-import { Link, useNavigate, useSearchParams } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import type { Route } from "./+types/signin";
 import type { SigninPayload } from "~/api";
 import { requireGuest } from "~/lib/auth.server";
@@ -25,7 +25,6 @@ export function meta(_: Route.MetaArgs) {
 }
 
 export default function SignIn() {
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const signin = useSignin();
   const {
@@ -36,7 +35,11 @@ export default function SignIn() {
 
   const onSubmit = handleSubmit((values) => {
     const redirectTo = searchParams.get("redirectTo") || "/";
-    signin.mutate(values, { onSuccess: () => navigate(redirectTo) });
+    signin.mutate(values, {
+      // Full navigation so the SSR loaders re-run with the new auth cookie and
+      // the navbar reflects the signed-in state immediately.
+      onSuccess: () => window.location.assign(redirectTo),
+    });
   });
 
   return (

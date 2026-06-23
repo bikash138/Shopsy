@@ -4,9 +4,9 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "node --watch src/index.ts",
-    "start": "node src/index.ts",
-    "seed": "node src/seed.ts"
+    "dev": "node --env-file-if-exists=.env --watch src/index.ts",
+    "start": "node --env-file-if-exists=.env src/index.ts",
+    "seed": "node --env-file-if-exists=.env src/seed.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",

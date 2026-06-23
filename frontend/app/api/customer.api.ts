@@ -1,5 +1,10 @@
 import { api } from "~/lib/axios";
-import type { Cart, Order } from "./types";
+import type {
+  Cart,
+  CreatePaymentResponse,
+  Order,
+  VerifyPaymentPayload,
+} from "./types";
 
 // Customer dashboard endpoints — require an authenticated customer.
 export const customerApi = {
@@ -31,4 +36,15 @@ export const customerApi = {
 
   cancelOrder: (id: string) =>
     api.patch<Order>(`/customer/orders/${id}/cancel`).then((r) => r.data),
+
+  // --- Payments ---
+  createPayment: (id: string) =>
+    api
+      .post<CreatePaymentResponse>(`/customer/orders/${id}/payment`)
+      .then((r) => r.data),
+
+  verifyPayment: (id: string, payload: VerifyPaymentPayload) =>
+    api
+      .post<Order>(`/customer/orders/${id}/payment/verify`, payload)
+      .then((r) => r.data),
 };

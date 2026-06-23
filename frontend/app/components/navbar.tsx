@@ -3,6 +3,7 @@ import { ShoppingBag } from "lucide-react";
 import type { AuthSession } from "~/api";
 import { useSignout } from "~/hooks";
 import { Button } from "~/components/ui/button";
+import { CartNav } from "~/components/cart-nav";
 
 export function Navbar({ session }: { session: AuthSession | null }) {
   const signout = useSignout();
@@ -22,14 +23,9 @@ export function Navbar({ session }: { session: AuthSession | null }) {
               Shop
             </Link>
             {session?.role === "customer" && (
-              <>
-                <Link to="/cart" className="text-muted-foreground hover:text-foreground">
-                  Cart
-                </Link>
-                <Link to="/orders" className="text-muted-foreground hover:text-foreground">
-                  Orders
-                </Link>
-              </>
+              <Link to="/orders" className="text-muted-foreground hover:text-foreground">
+                Orders
+              </Link>
             )}
             {session?.role === "seller" && (
               <Link to="/seller" className="text-muted-foreground hover:text-foreground">
@@ -42,6 +38,7 @@ export function Navbar({ session }: { session: AuthSession | null }) {
         <div className="flex items-center gap-2">
           {session ? (
             <>
+              {session.role === "customer" && <CartNav />}
               <Button asChild variant="ghost" size="sm">
                 <Link to="/profile">Profile</Link>
               </Button>

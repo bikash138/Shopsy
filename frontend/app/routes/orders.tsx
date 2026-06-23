@@ -5,6 +5,7 @@ import { useCustomerOrders } from "~/hooks";
 import { formatDate, formatPrice } from "~/lib/format";
 import { OrderStatusBadge, PaymentStatusBadge } from "~/components/status-badge";
 import { CancelOrderButton } from "~/components/cancel-order-button";
+import { PayButton } from "~/components/pay-button";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
@@ -73,6 +74,10 @@ export default function Orders() {
                 <Button asChild variant="outline" size="sm">
                   <Link to={`/orders/${order._id}`}>View</Link>
                 </Button>
+                {order.paymentStatus === "pending" &&
+                  order.orderStatus !== "cancelled" && (
+                    <PayButton orderId={order._id} />
+                  )}
                 {order.orderStatus === "processing" && (
                   <CancelOrderButton orderId={order._id} />
                 )}

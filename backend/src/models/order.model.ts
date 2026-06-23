@@ -49,6 +49,8 @@ const orderSchema = new Schema<Order>(
       default: "processing",
       required: true,
     },
+    razorpayOrderId: { type: String },
+    razorpayPaymentId: { type: String },
   },
   { timestamps: true },
 );
